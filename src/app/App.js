@@ -13,6 +13,7 @@ class App extends Component{
     this.canvasRef = React.createRef();
     this.dragginNow = false;
     this.dragIndex = false;
+    this.selectedIndex = null;
     this.state = {
       isHomeAdded: false,
       isHangoutAdded: false,
@@ -32,6 +33,7 @@ class App extends Component{
 
   componentDidMount = () => {
     document.body.addEventListener("click", this.closeCustomBox);
+    document.body.addEventListener("keyup", this.deleteBox);
     this.canvasArea = this.canvasRef.current.getBoundingClientRect();
     this.canvasRef.current.width = this.canvasRef.current.offsetWidth;
     this.canvasRef.current.height = this.canvasRef.current.offsetHeight;
@@ -40,6 +42,38 @@ class App extends Component{
 
   componentWillUnmount = () => {
     document.body.removeEventListener("click", this.closeCustomBox);
+    document.body.removeEventListener("keyup", this.deleteBox);
+  }
+
+  deleteBox = (event) => {
+    if (event.keyCode === 46) {
+      if (this.selectedIndex !== null) {
+        // eslint-disable-next-line no-restricted-globals
+        if (confirm("Are you sure you want to delete this box ?")) {
+          this.closeBox();
+          this.boxes.splice(this.selectedIndex, 1);
+          this.clearRect();
+          this.drawAllBoxes();
+        }
+      } else {
+        alert("You must select a box first");
+      }
+    }
+  }
+
+  unselectBoxes = (event) => {
+    let x = event.clientX - this.canvasArea.left; 
+    let y = event.clientY - this.canvasArea.top; 
+    for (let i = 0; i < this.boxes.length; i++) {
+      if(!this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
+        if (this.selectedIndex !== null) {
+          this.boxes[this.selectedIndex].isSelected = false;
+          this.selectedIndex = null;
+          this.clearRect();
+          this.drawAllBoxes();
+        }
+      }
+    }
   }
 
   closeBox = () => {
@@ -55,6 +89,7 @@ class App extends Component{
         this.closeBox();
       }
     }
+    this.unselectBoxes(event);
   }
 
   drawAllBoxes = () => {
@@ -68,6 +103,11 @@ class App extends Component{
       const cont = this.canvasRef.current.getContext('2d');
       const dpr = window.devicePixelRatio;
       cont.scale(dpr, dpr);
+      console.log(dimen.isSelected);
+      if (dimen.isSelected === true) {
+        cont.fillStyle = "#000000";
+        cont.fillRect(dimen.x+5, dimen.y+5, dimen.width, dimen.height); 
+       }
       cont.fillStyle = "#ffffff";
       cont.fillRect(dimen.x, dimen.y, dimen.width, dimen.height); 
       cont.font = "30px Arial";
@@ -124,7 +164,6 @@ class App extends Component{
     let y = event.clientY - this.canvasArea.top; 
     for (let i = 0; i < this.boxes.length; i++) {
       if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
-        console.log(x, y);
         console.log("dragstart");
         this.dragIndex = i;
         this.dragginNow = true;
@@ -167,6 +206,16 @@ class App extends Component{
     });
   }
 
+  selectBox = (index) => {
+    if (this.selectedIndex !== null) {
+      this.boxes[this.selectedIndex].isSelected = false;
+    }
+    this.selectedIndex = index;
+    this.boxes[index].isSelected = true;
+    this.clearRect();
+    this.drawAllBoxes();
+  }
+
   handleCustomBoxOpen = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -174,6 +223,7 @@ class App extends Component{
     let y = event.clientY - this.canvasArea.top; 
     for (let i = 0; i < this.boxes.length; i++) {
       if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
+        this.selectBox(i);
         this.openSetupBox(i);
         return;
       }
