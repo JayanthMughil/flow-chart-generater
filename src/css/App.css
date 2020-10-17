@@ -3,6 +3,12 @@ img {
     max-height: 100%;
 }
 
+canvas {
+    height: 100%;
+    width: 100%;
+    background-color: #ECECEC;
+}
+
 .OverallWrapper {
   bottom: 0;
   top: 0;
@@ -40,6 +46,12 @@ img {
 
 .centerBlk {
     flex: 1;
+}
+
+.canvasBlk {
+    display: block;
+    height: 100%;
+    width: 100%;
 }
 
 .saveIcon {
