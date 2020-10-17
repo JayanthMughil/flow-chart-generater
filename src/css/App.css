@@ -48,3 +48,30 @@ img {
     margin-left: auto;
     padding-right: 20px;
 }
+
+.navContainer {
+    height: 100%;
+    width: 100%;
+    padding-left: 2px;
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    border-right: #e7e7e7 1px solid;
+    box-sizing: border-box;
+}
+
+.navBox {
+    width: 300px;
+    height: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    vertical-align: middle;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 5px 6px -6px black;
+    background-color: #fbfbfb;
+    border: #e7e7e7 1px solid;
+    box-sizing: border-box;
+}

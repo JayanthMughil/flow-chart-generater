@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavBar } from "./navBar/navBar";
 import '../css/App.css';
 import saveLogo from "../images/save-file-option.svg";
 
@@ -13,7 +14,7 @@ function App() {
       </div>
       <div className="pageWrapper">
         <div className="navBlk">
-
+          <NavBar />
         </div>
         <div className="centerBlk">
 
