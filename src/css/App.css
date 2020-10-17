@@ -9,6 +9,29 @@ canvas {
     background-color: #ECECEC;
 }
 
+textarea {
+    padding: 12px;
+    border: #e7e7e7 1px solid;
+    box-sizing: border-box;
+    border-radius: 3px;
+    min-height: 100px;
+}
+
+button {
+    background-color: #1d6eff;
+    color: #e7e7e7;
+    border-radius: 3px;
+    border: #e7e7e7 1px solid;
+    box-sizing: border-box;
+    margin-top: 10px;
+    padding: 15px;
+    font-size: large;
+    display: inline-block;
+    line-height: 50px;
+    text-align: center;
+    cursor: pointer;
+}
+
 .OverallWrapper {
   bottom: 0;
   top: 0;
@@ -79,6 +102,7 @@ canvas {
     margin-right: 10px;
     margin-bottom: 10px;
     margin-top: 10px;
+    cursor: pointer;
     vertical-align: middle;
     text-align: center;
     border-radius: 5px;
@@ -86,4 +110,24 @@ canvas {
     background-color: #fbfbfb;
     border: #e7e7e7 1px solid;
     box-sizing: border-box;
+}
+
+.disabled {
+    pointer-events: none;
+    background-color: darkgray;
+}
+
+.customBox {
+    text-align: center;
+    background-color: #fbfbfb;
+    box-shadow: -2px 0 6px 0 #e7e7e7;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 15px;
+    width: 400px;
 }

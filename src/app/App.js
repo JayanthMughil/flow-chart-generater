@@ -1,7 +1,10 @@
 import React, {Component} from 'react';
 import { boxTitles } from "./constants";
+import { CustomDet } from "./customDetails";
 import '../css/App.css';
 import saveLogo from "../images/save-file-option.svg";
+
+const home = "Home", hang="Hang up";
 
 class App extends Component{
 
@@ -12,23 +15,46 @@ class App extends Component{
     this.dragIndex = false;
     this.state = {
       isHomeAdded: false,
-      isHangoutAdded: false
+      isHangoutAdded: false,
+      openCustomBox: false,
+      customBoxObj: null
     }
     this.boxes = [{
         x: 10,
         y: 10,
         width: 200,
-        height: 200,
+        height: 170,
         fill: '#ffffff',
-        text: boxTitles[1]
+        text: boxTitles[1],
+        extraDet: ""
       }];
   }
 
   componentDidMount = () => {
+    document.body.addEventListener("click", this.closeCustomBox);
     this.canvasArea = this.canvasRef.current.getBoundingClientRect();
     this.canvasRef.current.width = this.canvasRef.current.offsetWidth;
     this.canvasRef.current.height = this.canvasRef.current.offsetHeight;
     this.drawAllBoxes();
+  }
+
+  componentWillUnmount = () => {
+    document.body.removeEventListener("click", this.closeCustomBox);
+  }
+
+  closeBox = () => {
+    this.setState({
+      openCustomBox: false,
+      customBoxObj: null
+    });
+  }
+
+  closeCustomBox = (event) => {
+    if (document.getElementById("custBox")) {
+      if (!document.getElementById("custBox").contains(event.target)) {
+        this.closeBox();
+      }
+    }
   }
 
   drawAllBoxes = () => {
@@ -59,14 +85,25 @@ class App extends Component{
   }
 
   createBox = (title) => {
+    if (title === home) {
+      this.setState({
+        isHomeAdded: true
+      });
+    }
+    if (title === hang) {
+      this.setState({
+        isHangoutAdded: true
+      });
+    }
     if (this.canvasRef.current.getContext) {
       const boxDimensions = {
         x: 10,
         y: 10,
         width: 200,
-        height: 200,
+        height: 170,
         fill: '#ffffff',
-        text: title
+        text: title,
+        extraDet: ""
       }
       this.drawRect(boxDimensions)
       this.boxes.push(boxDimensions);
@@ -106,7 +143,8 @@ class App extends Component{
         width: this.boxes[this.dragIndex].width,
         height: this.boxes[this.dragIndex].height,
         fill: this.boxes[this.dragIndex].fill,
-        text: this.boxes[this.dragIndex].text
+        text: this.boxes[this.dragIndex].text,
+        extraDet: this.boxes[this.dragIndex].extraDet
       };
       this.boxes.splice(this.dragIndex, 1);
       this.boxes.push(newDimen);
@@ -122,41 +160,72 @@ class App extends Component{
     this.dragIndex = false;
   }
 
+  openSetupBox = (index) => {
+    this.setState({
+      openCustomBox: true,
+      customBoxObj: index
+    });
+  }
+
+  handleCustomBoxOpen = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    let x = event.clientX - this.canvasArea.left; 
+    let y = event.clientY - this.canvasArea.top; 
+    for (let i = 0; i < this.boxes.length; i++) {
+      if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
+        this.openSetupBox(i);
+        return;
+      }
+    }
+  }
+
+  saveCustomDetail = (detail) => {
+    this.boxes[this.state.customBoxObj].extraDet = detail;
+    this.closeBox();
+  }
+
   render () {
     return (
-      <div className="OverallWrapper">
-        <div className="topBar">
-          Canvas
-          <div className="saveIcon">
-            <img src={saveLogo} alt="" />
+      <>
+          <div className="OverallWrapper">
+            <div className="topBar">
+              Canvas
+              <div className="saveIcon">
+                <img src={saveLogo} alt="" />
+              </div>
+            </div>
+            <div className="blockWrapper">
+              <div className="pageWrapper">
+                <div className="navBlk">
+                <div className="navContainer">
+                      {boxTitles.map((title, index) => {
+                          return (
+                              <div key={index} className={`navBox ${(this.state.isHomeAdded && title === home) || (this.state.isHangoutAdded && title === hang) ? "disabled" : ""}`}
+                              onClick={() => this.createBox(title)}
+                              >
+                                      {title}
+                              </div>
+                          )
+                      })}
+                  </div>
+                </div>
+                <div className="centerBlk">
+                  <div className="canvasBlk" id="canvas">
+                    <canvas ref={this.canvasRef} 
+                    onClick={this.handleCustomBoxOpen}
+                    onMouseMove={this.dragRect}
+                    onMouseDown={this.checkMousePos}
+                    onMouseUp={this.dragEnd}>
+                    
+                    </canvas>
+                  </div>
+                </div>
+            </div>
           </div>
         </div>
-        <div className="blockWrapper">
-          <div className="pageWrapper">
-            <div className="navBlk">
-            <div className="navContainer">
-                  {boxTitles.map((title, index) => {
-                      return (
-                          <div key={index} className="navBox" onClick={() => this.createBox(title)}>
-                                  {title}
-                          </div>
-                      )
-                  })}
-              </div>
-            </div>
-            <div className="centerBlk">
-              <div className="canvasBlk" id="canvas">
-                <canvas ref={this.canvasRef} 
-                onMouseMove={this.dragRect}
-                onMouseDown={this.checkMousePos}
-                onMouseUp={this.dragEnd}>
-                
-                </canvas>
-              </div>
-            </div>
-        </div>
-       </div>
-     </div>
+        {this.state.openCustomBox ? <CustomDet saveCustomDetail={this.saveCustomDetail} boxDet={this.boxes[this.state.customBoxObj]}/> : ""}
+      </>
     );
   }
 
