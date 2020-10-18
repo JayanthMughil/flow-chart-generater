@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import { boxTitles } from "./constants";
 import { CustomDet } from "./customDetails";
+import ReactTooltip from 'react-tooltip';
 import '../css/App.css';
 import saveLogo from "../images/save-file-option.svg";
+import clsLogo from "../images/cls.png";
 
 const home = "Home", hang="Hang up";
 
@@ -22,17 +24,14 @@ class App extends Component{
       openCustomBox: false,
       customBoxObj: null
     }
-    this.boxes = [{
-        x: 10,
-        y: 10,
-        width: 200,
-        height: 170,
-        fill: '#ffffff',
-        text: boxTitles[1],
-        extraDet: "",
-        connInds:[],
-        inInds: []
-      }];
+    if (typeof(Storage) !== "undefined") {
+      let storedBoxes = JSON.parse(localStorage.getItem("lastSaved"));
+      if (Array.isArray(storedBoxes)) {
+        this.boxes = storedBoxes;
+      } else {
+        this.boxes = [];
+      }
+    }
   }
 
   componentDidMount = () => {
@@ -166,10 +165,10 @@ class App extends Component{
   }
 
   drawAllBoxes = () => {
+    this.connectAllBoxes();
     for (let i = 0; i < this.boxes.length; i++) {
       this.drawRect(this.boxes[i]);
     }
-    this.connectAllBoxes();
   }
 
   drawRect = (dimen) => {
@@ -364,26 +363,68 @@ class App extends Component{
     this.closeBox();
   }
 
+  saveProgress = () => {
+    if (typeof(Storage) !== "undefined") {
+      localStorage.setItem("lastSaved", JSON.stringify(this.boxes));
+      alert("The current setup has been saved !")
+    }
+  }
+
+  showPreviousSetup = () => {
+    if (typeof(Storage) !== "undefined") {
+      let store = JSON.parse(localStorage.getItem("lastSaved"));
+      if (Array.isArray(store)) {
+        this.boxes = store;
+      } else {
+        this.boxes = [];
+      }
+      this.clearRect();
+      this.drawAllBoxes();
+    }
+  }
+
+  clearCanvas = () => {
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm("Are you sure you want to clear the canvas ?")) {
+      if (typeof(Storage) !== "undefined") {
+        this.boxes = [];
+        localStorage.clear();
+        this.clearRect();
+        this.drawAllBoxes();
+      }
+    }
+  }
+
   render () {
     return (
       <>
           <div className="OverallWrapper">
             <div className="topBar">
               Canvas
-              <div className="saveIcon">
-                <img src={saveLogo} alt="" />
+              <div className="rightWrapper">
+                <div className="link" onClick={this.showPreviousSetup}>
+                  Go back to previous Setup
+                </div>
+                <div className="saveIcon" data-tip="Clear the canvas" onClick={this.clearCanvas} style={{cursor: "pointer"}}>
+                  <img src={clsLogo} alt="" />
+                </div>
+                <div className="saveIcon" data-tip="Save the current setup" onClick={this.saveProgress} style={{cursor: "pointer"}}>
+                  <img src={saveLogo} alt="" />
+                </div>
               </div>
             </div>
             <div className="blockWrapper">
               <div className="pageWrapper">
                 <div className="navBlk">
-                <div className="navContainer">
+                  <div className="navContainer">
                       {boxTitles.map((title, index) => {
                           return (
                               <div key={index} className={`navBox ${(this.state.isHomeAdded && title === home) || (this.state.isHangoutAdded && title === hang) ? "disabled" : ""}`}
                               onClick={() => this.createBox(title)}
                               >
-                                      {title}
+                                      <div className="iconWrapper">
+                                         {title} 
+                                      </div>
                               </div>
                           )
                       })}
@@ -404,6 +445,7 @@ class App extends Component{
           </div>
         </div>
         {this.state.openCustomBox ? <CustomDet saveCustomDetail={this.saveCustomDetail} boxDet={this.boxes[this.state.customBoxObj]}/> : ""}
+        <ReactTooltip />
       </>
     );
   }
