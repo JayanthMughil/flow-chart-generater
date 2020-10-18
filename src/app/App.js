@@ -28,7 +28,8 @@ class App extends Component{
         fill: '#ffffff',
         text: boxTitles[1],
         extraDet: "",
-        connInds:[1, 2]
+        connInds:[1, 2],
+        inInds: []
       },{
         x: 300,
         y: 200,
@@ -82,7 +83,6 @@ class App extends Component{
       let x = dimen.x + dimen.width;
       for (let i = 0; i < dimen.connInds.length; i++) {
         let y = dimen.y + (i+1)*10;
-        console.log(this.boxes[dimen.connInds[i]]);
         this.drawArrow(cont, x, y, this.boxes[dimen.connInds[i]].x, this.boxes[dimen.connInds[i]].y+this.boxes[dimen.connInds[i]].inInds.length*10);
       }
     }
@@ -124,12 +124,12 @@ class App extends Component{
         if (confirm("Are you sure you want to delete this box ?")) {
           this.closeBox();
           let selectBox = this.boxes[this.selectedIndex];
+          console.log(selectBox);
           for (let i = 0; i < selectBox.inInds.length; i++) {
             let findInd = this.boxes[selectBox.inInds[i]].connInds.indexOf(this.selectedIndex);
             this.boxes[selectBox.inInds[i]].connInds.splice(findInd, 1);
           }
           this.boxes.splice(this.selectedIndex, 1);
-          console.log(this.boxes);
           this.selectedIndex = null;
           this.clearRect();
           this.drawAllBoxes();
