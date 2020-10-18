@@ -27,7 +27,29 @@ class App extends Component{
         height: 170,
         fill: '#ffffff',
         text: boxTitles[1],
-        extraDet: ""
+        extraDet: "",
+        connInds:[1, 2]
+      },{
+        x: 300,
+        y: 200,
+        width: 200,
+        height: 170,
+        fill: '#ffffff',
+        text: boxTitles[2],
+        extraDet: "",
+        connInds:[],
+        inInds:[0]
+      },
+      {
+        x: 500,
+        y: 600,
+        width: 200,
+        height: 170,
+        fill: '#ffffff',
+        text: boxTitles[3],
+        extraDet: "",
+        connInds: [],
+        inInds: [0]
       }];
   }
 
@@ -38,11 +60,61 @@ class App extends Component{
     this.canvasRef.current.width = this.canvasRef.current.offsetWidth;
     this.canvasRef.current.height = this.canvasRef.current.offsetHeight;
     this.drawAllBoxes();
+    this.connectAllBoxes();
   }
 
   componentWillUnmount = () => {
     document.body.removeEventListener("click", this.closeCustomBox);
     document.body.removeEventListener("keyup", this.deleteBox);
+  }
+
+  connectAllBoxes = () => {
+    for (let i = 0; i < this.boxes.length; i++) {
+      this.connectBoxes(this.boxes[i]);
+    }
+  }
+
+  connectBoxes = (dimen) => {
+    if (this.canvasRef.current.getContext) {
+      const cont = this.canvasRef.current.getContext('2d');
+      const dpr = window.devicePixelRatio;
+      cont.scale(dpr, dpr);
+      let x = dimen.x + dimen.width;
+      for (let i = 0; i < dimen.connInds.length; i++) {
+        let y = dimen.y + (i+1)*10;
+        console.log(this.boxes[dimen.connInds[i]]);
+        this.drawArrow(cont, x, y, this.boxes[dimen.connInds[i]].x, this.boxes[dimen.connInds[i]].y+this.boxes[dimen.connInds[i]].inInds.length*10);
+      }
+    }
+  }
+
+  drawArrow = (ctx, fromx, fromy, tox, toy) => {
+    let headlen = 10;
+    let angle = Math.atan2(toy-fromy,tox-fromx);
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    let cp1x = fromx + Math.abs(tox-fromx);
+    let cp1y = fromy;
+    let cp2x = tox - Math.abs(tox-fromx);
+    let cp2y = toy;
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, tox, toy);
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+    
+    ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
+
+    ctx.lineTo(tox, toy);
+    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.fillStyle = "#000000";
+    ctx.fill();
   }
 
   deleteBox = (event) => {
@@ -51,7 +123,14 @@ class App extends Component{
         // eslint-disable-next-line no-restricted-globals
         if (confirm("Are you sure you want to delete this box ?")) {
           this.closeBox();
+          let selectBox = this.boxes[this.selectedIndex];
+          for (let i = 0; i < selectBox.inInds.length; i++) {
+            let findInd = this.boxes[selectBox.inInds[i]].connInds.indexOf(this.selectedIndex);
+            this.boxes[selectBox.inInds[i]].connInds.splice(findInd, 1);
+          }
           this.boxes.splice(this.selectedIndex, 1);
+          console.log(this.boxes);
+          this.selectedIndex = null;
           this.clearRect();
           this.drawAllBoxes();
         }
@@ -96,6 +175,7 @@ class App extends Component{
     for (let i = 0; i < this.boxes.length; i++) {
       this.drawRect(this.boxes[i]);
     }
+    this.connectAllBoxes();
   }
 
   drawRect = (dimen) => {
@@ -103,7 +183,6 @@ class App extends Component{
       const cont = this.canvasRef.current.getContext('2d');
       const dpr = window.devicePixelRatio;
       cont.scale(dpr, dpr);
-      console.log(dimen.isSelected);
       if (dimen.isSelected === true) {
         cont.fillStyle = "#000000";
         cont.fillRect(dimen.x+5, dimen.y+5, dimen.width, dimen.height); 
@@ -143,7 +222,9 @@ class App extends Component{
         height: 170,
         fill: '#ffffff',
         text: title,
-        extraDet: ""
+        extraDet: "",
+        connInds: [],
+        inInds: []
       }
       this.drawRect(boxDimensions)
       this.boxes.push(boxDimensions);
@@ -183,11 +264,11 @@ class App extends Component{
         height: this.boxes[this.dragIndex].height,
         fill: this.boxes[this.dragIndex].fill,
         text: this.boxes[this.dragIndex].text,
-        extraDet: this.boxes[this.dragIndex].extraDet
+        extraDet: this.boxes[this.dragIndex].extraDet,
+        connInds: this.boxes[this.dragIndex].connInds,
+        inInds: this.boxes[this.dragIndex].inInds
       };
-      this.boxes.splice(this.dragIndex, 1);
-      this.boxes.push(newDimen);
-      this.dragIndex = this.boxes.length - 1;
+      this.boxes.splice(this.dragIndex, 1, newDimen);
       this.clearRect();
       this.drawAllBoxes();
     }
