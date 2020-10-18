@@ -97,6 +97,19 @@ class App extends Component{
     ctx.fill();
   }
 
+  checkHomeAndHang = (title) => {
+    if (title === home) {
+      this.setState({
+        isHomeAdded: false
+      });
+    }
+    if (title === hang) {
+      this.setState({
+        isHangoutAdded: false
+      });
+    }
+  }
+
   deleteBox = (event) => {
     if (event.keyCode === 46) {
       if (this.selectedIndex !== null) {
@@ -104,8 +117,8 @@ class App extends Component{
         if (confirm("Are you sure you want to delete this box ?")) {
           this.closeBox();
           let selectBox = this.boxes[this.selectedIndex];
-          console.log(selectBox);
-          console.log(this.boxes);
+          this.checkHomeAndHang(selectBox.text);
+      
           for (let i = 0; i < selectBox.inInds.length; i++) {
             let findInd = this.boxes[selectBox.inInds[i]].connInds.indexOf(this.selectedIndex);
             this.boxes[selectBox.inInds[i]].connInds.splice(findInd, 1);
@@ -240,7 +253,6 @@ class App extends Component{
   }
 
   isPointInRightArrowZone = (x, y, x1, y1, x2, y2) => {
-    console.log(x > x2-10 && x < x2 && y > y1 && y < y2);
     if (x > x2-10 && x < x2 && y > y1 && y < y2) {
       return true;
     }
@@ -260,7 +272,6 @@ class App extends Component{
         return;
       }
       if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
-        console.log("dragstart");
         this.dragIndex = i;
         this.dragginNow = true;
       }
@@ -286,7 +297,6 @@ class App extends Component{
     if (this.dragginNow && !isNaN(this.dragIndex)) {
       let x = event.clientX - this.canvasArea.left; 
       let y = event.clientY - this.canvasArea.top;
-      console.log("draggin");
       let newDimen = {
         x: x,
         y: y,
@@ -306,6 +316,7 @@ class App extends Component{
 
   dragEnd = (event) => {
     console.log("ended");
+    event.stopPropagation();
     this.dragginNow = false;
     this.dragIndex = false;
     if (this.arrowNow && !isNaN(this.arrowIndex)) {
@@ -320,7 +331,9 @@ class App extends Component{
         }
       }
     }
-    this.arrowNow = false;
+    setTimeout(() => {
+      this.arrowNow = false;
+    }, 100);
     this.arrowIndex = false;
     this.clearRect();
     this.drawAllBoxes();
@@ -344,9 +357,11 @@ class App extends Component{
   }
 
   handleCustomBoxOpen = (event) => {
-    console.log("box");
     event.preventDefault();
     event.stopPropagation();
+    if (this.arrowNow) {
+      return;
+    }
     let x = event.clientX - this.canvasArea.left; 
     let y = event.clientY - this.canvasArea.top; 
     for (let i = 0; i < this.boxes.length; i++) {
