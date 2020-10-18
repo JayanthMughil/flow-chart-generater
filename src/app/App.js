@@ -349,10 +349,12 @@ class App extends Component{
       let x = event.clientX - this.canvasArea.left; 
       let y = event.clientY - this.canvasArea.top;
       for (let i = 0; i < this.boxes.length; i++) {
-        if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
-          if (!this.boxes[this.arrowIndex].connInds.includes(i)) {
-            this.boxes[this.arrowIndex].connInds.push(i);
-            this.boxes[i].inInds.push(this.arrowIndex);
+        if (i !== this.arrowIndex) {
+          if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
+            if (!this.boxes[this.arrowIndex].connInds.includes(i)) {
+              this.boxes[this.arrowIndex].connInds.push(i);
+              this.boxes[i].inInds.push(this.arrowIndex);
+            }
           }
         }
       }
