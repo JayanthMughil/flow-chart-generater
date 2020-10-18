@@ -33,15 +33,7 @@ class App extends Component{
         this.boxes = [];
       }
     }
-    if (typeof(Storage) !== "undefined") {
-      if (localStorage.getItem("deleted") !== "") {
-        this.deletedBoxes = JSON.parse(localStorage.getItem("deleted"));
-      } else {
-        this.deletedBoxes = [];
-      }
-    } else {
-      this.deletedBoxes = [];
-    }
+    this.deletedBoxes = [];
   }
 
   componentDidMount = () => {
@@ -133,9 +125,10 @@ class App extends Component{
       }
     }
     box.isSelected = false;
-    this.deletedBoxes.splice(0, 1, box);
-    if (typeof(Storage) !== "undefined") {
-      localStorage.setItem("deleted", JSON.stringify(this.deletedBoxes));
+    if (this.deletedBoxes.length > 0) {
+      this.deletedBoxes.splice(0, 1, box);
+    } else {
+      this.deletedBoxes.push(box);
     }
   }
 
@@ -445,25 +438,16 @@ class App extends Component{
       this.boxes[box.inInds[i]].connInds.push(ind);
     }
     this.deletedBoxes = [];
-    if (typeof(Storage) !== "undefined") {
-      localStorage.setItem("deleted", "");
-    }
+  
     this.clearRect();
     this.drawAllBoxes();
   }
 
   undoDelete = () => {
-    if (typeof(Storage) !== "undefined") {
-      if (localStorage.getItem("deleted") !== "") {
-        this.deletedBoxes = JSON.parse(localStorage.getItem("deleted"));
-        if (this.deletedBoxes.length === 0) {
-          alert("No deleted boxes to undo !")
-        } else {
-          this.restoreBox(this.deletedBoxes[0]);
-        }
-      } else {
-        alert("No deleted boxes to undo !")
-      }
+    if (this.deletedBoxes.length === 0) {
+      alert("No deleted boxes to undo !")
+    } else {
+      this.restoreBox(this.deletedBoxes[0]);
     }
   }
 
