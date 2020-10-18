@@ -17,7 +17,17 @@ textarea {
     min-height: 100px;
 }
 
-button {
+.btn {
+    background-color: #1d6eff;
+    color: #e7e7e7;
+    border-radius: 3px;
+    border: #e7e7e7 1px solid;
+    box-sizing: border-box;
+    font-size: large;
+    cursor: pointer;
+}
+
+.bttn {
     background-color: #1d6eff;
     color: #e7e7e7;
     border-radius: 3px;
@@ -132,6 +142,7 @@ button {
 .disabled {
     pointer-events: none;
     background-color: darkgray;
+    color: #e7e7e7;
 }
 
 .customBox {
@@ -147,4 +158,8 @@ button {
     bottom: 0;
     padding: 15px;
     width: 400px;
+}
+
+.zoomWrapper {
+    padding-left: 780px;
 }

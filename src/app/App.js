@@ -7,6 +7,7 @@ import saveLogo from "../images/save-file-option.svg";
 import clsLogo from "../images/cls.png";
 
 const home = "Home", hang="Hang up";
+var zoomLevel = window.devicePixelRatio;
 
 class App extends Component{
 
@@ -32,6 +33,15 @@ class App extends Component{
         this.boxes = [];
       }
     }
+    if (typeof(Storage) !== "undefined") {
+      if (localStorage.getItem("deleted") !== "") {
+        this.deletedBoxes = JSON.parse(localStorage.getItem("deleted"));
+      } else {
+        this.deletedBoxes = [];
+      }
+    } else {
+      this.deletedBoxes = [];
+    }
   }
 
   componentDidMount = () => {
@@ -47,6 +57,9 @@ class App extends Component{
   componentWillUnmount = () => {
     document.body.removeEventListener("click", this.closeCustomBox);
     document.body.removeEventListener("keyup", this.deleteBox);
+    if (typeof(Storage) !== "undefined") {
+      localStorage.setItem("deleted", "");
+    }
   }
 
   connectAllBoxes = () => {
@@ -58,8 +71,6 @@ class App extends Component{
   connectBoxes = (dimen, index) => {
     if (this.canvasRef.current.getContext) {
       const cont = this.canvasRef.current.getContext('2d');
-      const dpr = window.devicePixelRatio;
-      cont.scale(dpr, dpr);
       let x = dimen.x + dimen.width;
       for (let i = 0; i < dimen.connInds.length; i++) {
         let y = dimen.y + (i+1)*10;
@@ -110,6 +121,24 @@ class App extends Component{
     }
   }
 
+  archiveBox = (box, index) => {
+    for (let i = 0; i < box.connInds.length; i++) {
+      if (box.connInds[i] > index) {
+        box.connInds[i] -= 1;
+      }
+    }
+    for (let i = 0; i < box.inInds.length; i++) {
+      if (box.inInds[i] > index) {
+        box.inInds[i] -= 1;
+      }
+    }
+    box.isSelected = false;
+    this.deletedBoxes.splice(0, 1, box);
+    if (typeof(Storage) !== "undefined") {
+      localStorage.setItem("deleted", JSON.stringify(this.deletedBoxes));
+    }
+  }
+
   deleteBox = (event) => {
     if (event.keyCode === 46) {
       if (this.selectedIndex !== null) {
@@ -118,6 +147,7 @@ class App extends Component{
           this.closeBox();
           let selectBox = this.boxes[this.selectedIndex];
           this.checkHomeAndHang(selectBox.text);
+          this.archiveBox(selectBox, this.selectedIndex);
       
           for (let i = 0; i < selectBox.inInds.length; i++) {
             let findInd = this.boxes[selectBox.inInds[i]].connInds.indexOf(this.selectedIndex);
@@ -187,8 +217,7 @@ class App extends Component{
   drawRect = (dimen) => {
     if (this.canvasRef.current.getContext) {
       const cont = this.canvasRef.current.getContext('2d');
-      const dpr = window.devicePixelRatio;
-      cont.scale(dpr, dpr);
+      cont.scale(zoomLevel, zoomLevel);
       if (dimen.isSelected === true) {
         cont.fillStyle = "#000000";
         cont.fillRect(dimen.x-5, dimen.y-5, dimen.width+10, dimen.height+10); 
@@ -226,7 +255,7 @@ class App extends Component{
         x: 10,
         y: 10,
         width: 200,
-        height: 170,
+        height: 120,
         fill: '#ffffff',
         text: title,
         extraDet: "",
@@ -286,8 +315,6 @@ class App extends Component{
       let y = event.clientY - this.canvasArea.top;
       if (this.canvasRef.current.getContext) {
         const cont = this.canvasRef.current.getContext('2d');
-        const dpr = window.devicePixelRatio;
-        cont.scale(dpr, dpr);
         let arrowBox = this.boxes[this.arrowIndex];
         this.clearRect();
         this.drawAllBoxes();
@@ -315,7 +342,6 @@ class App extends Component{
   }
 
   dragEnd = (event) => {
-    console.log("ended");
     event.stopPropagation();
     this.dragginNow = false;
     this.dragIndex = false;
@@ -410,15 +436,47 @@ class App extends Component{
     }
   }
 
+  restoreBox = (box) => {
+    let ind = this.boxes.length;
+    this.boxes.push(box);
+    for (let i = 0; i < box.inInds.length; i++) {
+      this.boxes[box.inInds[i]].connInds.push(ind);
+    }
+    this.deletedBoxes = [];
+    if (typeof(Storage) !== "undefined") {
+      localStorage.setItem("deleted", "");
+    }
+    this.clearRect();
+    this.drawAllBoxes();
+  }
+
+  undoDelete = () => {
+    if (typeof(Storage) !== "undefined") {
+      if (localStorage.getItem("deleted") !== "") {
+        this.deletedBoxes = JSON.parse(localStorage.getItem("deleted"));
+        if (this.deletedBoxes.length === 0) {
+          alert("No deleted boxes to undo !")
+        } else {
+          this.restoreBox(this.deletedBoxes[0]);
+        }
+      } else {
+        alert("No deleted boxes to undo !")
+      }
+    }
+  }
+
   render () {
     return (
       <>
           <div className="OverallWrapper">
             <div className="topBar">
               Canvas
+              <div className="zoomWrapper">
+                <span className="link" onClick={this.undoDelete}> Undo delete </span>
+              </div>
               <div className="rightWrapper">
                 <div className="link" onClick={this.showPreviousSetup}>
-                  Go back to previous Setup
+                  Go to Previous Setup
                 </div>
                 <div className="saveIcon" data-tip="Clear the canvas" onClick={this.clearCanvas} style={{cursor: "pointer"}}>
                   <img src={clsLogo} alt="" />

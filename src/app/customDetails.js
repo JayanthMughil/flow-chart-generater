@@ -21,7 +21,7 @@ class CustomDet extends Component {
                 defaultValue={this.props.boxDet.extraDet}>
 
                 </textarea>
-                <button onClick={this.saveCustomDetail}>Save</button>
+                <button className="bttn" onClick={this.saveCustomDetail}>Save</button>
             </div>
         );
     }
