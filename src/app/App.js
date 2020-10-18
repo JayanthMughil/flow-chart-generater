@@ -11,8 +11,10 @@ class App extends Component{
   constructor (props) {
     super(props);
     this.canvasRef = React.createRef();
+    this.arrowNow = false;
     this.dragginNow = false;
     this.dragIndex = false;
+    this.arrowIndex = null;
     this.selectedIndex = null;
     this.state = {
       isHomeAdded: false,
@@ -28,29 +30,8 @@ class App extends Component{
         fill: '#ffffff',
         text: boxTitles[1],
         extraDet: "",
-        connInds:[1, 2],
-        inInds: []
-      },{
-        x: 300,
-        y: 200,
-        width: 200,
-        height: 170,
-        fill: '#ffffff',
-        text: boxTitles[2],
-        extraDet: "",
         connInds:[],
-        inInds:[0]
-      },
-      {
-        x: 500,
-        y: 600,
-        width: 200,
-        height: 170,
-        fill: '#ffffff',
-        text: boxTitles[3],
-        extraDet: "",
-        connInds: [],
-        inInds: [0]
+        inInds: []
       }];
   }
 
@@ -71,11 +52,11 @@ class App extends Component{
 
   connectAllBoxes = () => {
     for (let i = 0; i < this.boxes.length; i++) {
-      this.connectBoxes(this.boxes[i]);
+      this.connectBoxes(this.boxes[i], i);
     }
   }
 
-  connectBoxes = (dimen) => {
+  connectBoxes = (dimen, index) => {
     if (this.canvasRef.current.getContext) {
       const cont = this.canvasRef.current.getContext('2d');
       const dpr = window.devicePixelRatio;
@@ -83,7 +64,7 @@ class App extends Component{
       let x = dimen.x + dimen.width;
       for (let i = 0; i < dimen.connInds.length; i++) {
         let y = dimen.y + (i+1)*10;
-        this.drawArrow(cont, x, y, this.boxes[dimen.connInds[i]].x, this.boxes[dimen.connInds[i]].y+this.boxes[dimen.connInds[i]].inInds.length*10);
+        this.drawArrow(cont, x, y, this.boxes[dimen.connInds[i]].x, this.boxes[dimen.connInds[i]].y+(this.boxes[dimen.connInds[i]].inInds.indexOf(index)+1)*10);
       }
     }
   }
@@ -125,11 +106,24 @@ class App extends Component{
           this.closeBox();
           let selectBox = this.boxes[this.selectedIndex];
           console.log(selectBox);
+          console.log(this.boxes);
           for (let i = 0; i < selectBox.inInds.length; i++) {
             let findInd = this.boxes[selectBox.inInds[i]].connInds.indexOf(this.selectedIndex);
             this.boxes[selectBox.inInds[i]].connInds.splice(findInd, 1);
           }
           this.boxes.splice(this.selectedIndex, 1);
+          for (let i = 0; i < this.boxes.length; i++) {
+            for (let j = 0; j < this.boxes[i].connInds.length; j++) {
+              if (this.boxes[i].connInds[j] > this.selectedIndex) {
+                this.boxes[i].connInds[j] -= 1;
+              }
+            }
+            for (let j = 0; j < this.boxes[i].inInds.length; j++) {
+              if (this.boxes[i].inInds[j] > this.selectedIndex) {
+                this.boxes[i].inInds[j] -= 1;
+              }
+            }
+          }
           this.selectedIndex = null;
           this.clearRect();
           this.drawAllBoxes();
@@ -185,14 +179,15 @@ class App extends Component{
       cont.scale(dpr, dpr);
       if (dimen.isSelected === true) {
         cont.fillStyle = "#000000";
-        cont.fillRect(dimen.x+5, dimen.y+5, dimen.width, dimen.height); 
+        cont.fillRect(dimen.x-5, dimen.y-5, dimen.width+10, dimen.height+10); 
        }
       cont.fillStyle = "#ffffff";
       cont.fillRect(dimen.x, dimen.y, dimen.width, dimen.height); 
       cont.font = "30px Arial";
-      console.log(dimen.text);
       cont.fillStyle = "#000000";
       cont.fillText(dimen.text, dimen.x + 50, dimen.y + 50);
+      cont.fillRect(dimen.x, dimen.y, 10, dimen.height);
+      cont.fillRect(dimen.x+dimen.width-10, dimen.y, 10, dimen.height); 
     }
   }
 
@@ -237,13 +232,34 @@ class App extends Component{
     }
     return false
   }
+
+  isPointInLeftArrowZone = (x, y, x1, y1, x2, y2) => {
+    if (x > x1 && x < x1+10 && y > y1 && y < y2) {
+      return true;
+    }
+    return false;
+  }
+
+  isPointInRightArrowZone = (x, y, x1, y1, x2, y2) => {
+    console.log(x > x2-10 && x < x2 && y > y1 && y < y2);
+    if (x > x2-10 && x < x2 && y > y1 && y < y2) {
+      return true;
+    }
+    return false;
+  }
   
   checkMousePos = (event) => {
     event.preventDefault();
     event.stopPropagation();
     let x = event.clientX - this.canvasArea.left; 
     let y = event.clientY - this.canvasArea.top; 
+
     for (let i = 0; i < this.boxes.length; i++) {
+      if (this.isPointInRightArrowZone(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
+        this.arrowNow = true;
+        this.arrowIndex = i;
+        return;
+      }
       if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
         console.log("dragstart");
         this.dragIndex = i;
@@ -253,6 +269,21 @@ class App extends Component{
   }
 
   dragRect = (event) => {
+    if (this.arrowNow && !isNaN(this.arrowIndex)) {
+      event.preventDefault();
+      event.stopPropagation();
+      let x = event.clientX - this.canvasArea.left; 
+      let y = event.clientY - this.canvasArea.top;
+      if (this.canvasRef.current.getContext) {
+        const cont = this.canvasRef.current.getContext('2d');
+        const dpr = window.devicePixelRatio;
+        cont.scale(dpr, dpr);
+        let arrowBox = this.boxes[this.arrowIndex];
+        this.clearRect();
+        this.drawAllBoxes();
+        this.drawArrow(cont, arrowBox.x + arrowBox.width, arrowBox.y + arrowBox.inInds.length*10, x, y);
+      }
+    }
     if (this.dragginNow && !isNaN(this.dragIndex)) {
       let x = event.clientX - this.canvasArea.left; 
       let y = event.clientY - this.canvasArea.top;
@@ -274,10 +305,26 @@ class App extends Component{
     }
   }
 
-  dragEnd = () => {
+  dragEnd = (event) => {
     console.log("ended");
     this.dragginNow = false;
     this.dragIndex = false;
+    if (this.arrowNow && !isNaN(this.arrowIndex)) {
+      let x = event.clientX - this.canvasArea.left; 
+      let y = event.clientY - this.canvasArea.top;
+      for (let i = 0; i < this.boxes.length; i++) {
+        if(this.isPointInside(x, y, this.boxes[i].x, this.boxes[i].y, this.boxes[i].x + this.boxes[i].width, this.boxes[i].y + this.boxes[i].height)) {
+          if (!this.boxes[this.arrowIndex].connInds.includes(i)) {
+            this.boxes[this.arrowIndex].connInds.push(i);
+            this.boxes[i].inInds.push(this.arrowIndex);
+          }
+        }
+      }
+    }
+    this.arrowNow = false;
+    this.arrowIndex = false;
+    this.clearRect();
+    this.drawAllBoxes();
   }
 
   openSetupBox = (index) => {
@@ -298,6 +345,7 @@ class App extends Component{
   }
 
   handleCustomBoxOpen = (event) => {
+    console.log("box");
     event.preventDefault();
     event.stopPropagation();
     let x = event.clientX - this.canvasArea.left; 
@@ -348,7 +396,7 @@ class App extends Component{
                     onMouseMove={this.dragRect}
                     onMouseDown={this.checkMousePos}
                     onMouseUp={this.dragEnd}>
-                    
+              
                     </canvas>
                   </div>
                 </div>
