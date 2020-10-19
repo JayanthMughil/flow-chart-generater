@@ -37,7 +37,7 @@ Note: cls also clears the save records if there where any.
 >> Restores the last deleted box in the canvas if there were any.
 
 **canvas**
-
+>> Click on a box to select a box and click on delete button to delete the box.
 >> Click on a box to open a setup tab where you can save additional info about the box.<br />
 >> Clicking on the save button only saves the extra detail temperorily. If you want to view the additional details upon reload
    click on the save button on the topbar.
