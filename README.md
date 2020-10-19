@@ -14,6 +14,7 @@ Launches the application in the localhost at port 3000.<br />
 
 ### `Product usage`
 
+**Left panel**
 
 
 
