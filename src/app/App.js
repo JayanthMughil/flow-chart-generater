@@ -8,6 +8,7 @@ import clsLogo from "../images/cls.png";
 
 const home = "Home", hang="Hang up";
 var zoomLevel = window.devicePixelRatio;
+let newBoxPixel = 0;
 
 class App extends Component{
 
@@ -245,8 +246,8 @@ class App extends Component{
     }
     if (this.canvasRef.current.getContext) {
       const boxDimensions = {
-        x: 10,
-        y: 10,
+        x: 10 + newBoxPixel,
+        y: 10 + newBoxPixel,
         width: 200,
         height: 120,
         fill: '#ffffff',
@@ -254,6 +255,11 @@ class App extends Component{
         extraDet: "",
         connInds: [],
         inInds: []
+      }
+      if (newBoxPixel <= 400) {
+        newBoxPixel += 10;
+      } else {
+        newBoxPixel = 0;
       }
       this.drawRect(boxDimensions)
       this.boxes.push(boxDimensions);
