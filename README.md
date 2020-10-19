@@ -21,24 +21,26 @@ Launches the application in the localhost at port 3000.<br />
 
 **Save button**
 
->> Saves the current state of the canvas. (You can view them upon reloading the page).
+>> Saves the current state of the canvas. (You can view them upon reloading the page or upon clicking **Go to previous setup** ).
 
 **cls - clear screen**
 
 >> Clears the entire canvas.
-Note: cls also clears the save records if there where any.
+Note: cls also clears the saved records if there was any.
 
 **Go to previous setup**
 
->> Shows the previous saved state of the canvas if there were any
+>> Shows the previous saved state of the canvas if there was any
+
+**Delete
+
+>> Click on a box to select and press delete button to delete the box.
 
 **Undo delete**
 
->> Restores the last deleted box in the canvas if there were any.
+>> Restores the last deleted box in the canvas if there was any.
 
 **canvas**
-
->> Click on a box to select a box and click on delete button to delete the box.
 
 >> Click on a box to open a setup tab where you can save additional info about the box.<br />
 
