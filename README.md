@@ -41,6 +41,8 @@ Note: cls also clears the save records if there where any.
 >> Click on a box to open a setup tab where you can save additional info about the box.<br />
 >> Clicking on the save button only saves the extra detail temperorily. If you want to view the additional details upon reload
    click on the save button on the topbar.
+>> Press and hold the box and drag wherever you want.
+>> Press and hold on the right port on the box and connect them to other boxes using arrows.
 
 
 
