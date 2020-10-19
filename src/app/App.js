@@ -114,7 +114,24 @@ class App extends Component{
     }
   }
 
-  archiveBox = (box, index) => {
+  archiveBox = (bbox, index) => {
+    let box = {
+      x: bbox.x,
+      y: bbox.y,
+      width: bbox.width,
+      height: bbox.height,
+      fill: bbox.fill,
+      text: bbox.text,
+      extraDet: bbox.extraDet,
+      connInds: [],
+      inInds: []
+    }
+    for (let i = 0; i < bbox.connInds.length; i++) {
+      box.connInds.push(bbox.connInds[i]);
+    }
+    for (let i = 0; i < bbox.inInds.length; i++) {
+      box.inInds.push(bbox.inInds[i]);
+    }
     for (let i = 0; i < box.connInds.length; i++) {
       if (box.connInds[i] > index) {
         box.connInds[i] -= 1;
@@ -142,12 +159,13 @@ class App extends Component{
           let selectBox = this.boxes[this.selectedIndex];
           this.checkHomeAndHang(selectBox.text);
           this.archiveBox(selectBox, this.selectedIndex);
-      
+          
           for (let i = 0; i < selectBox.inInds.length; i++) {
             let findInd = this.boxes[selectBox.inInds[i]].connInds.indexOf(this.selectedIndex);
             this.boxes[selectBox.inInds[i]].connInds.splice(findInd, 1);
           }
           this.boxes.splice(this.selectedIndex, 1);
+
           for (let i = 0; i < this.boxes.length; i++) {
             for (let j = 0; j < this.boxes[i].connInds.length; j++) {
               if (this.boxes[i].connInds[j] > this.selectedIndex) {
@@ -160,6 +178,7 @@ class App extends Component{
               }
             }
           }
+         
           this.selectedIndex = null;
           this.clearRect();
           this.drawAllBoxes();
@@ -310,7 +329,9 @@ class App extends Component{
         let arrowBox = this.boxes[this.arrowIndex];
         this.clearRect();
         this.drawAllBoxes();
-        this.drawArrow(cont, arrowBox.x + arrowBox.width, arrowBox.y + 40 + arrowBox.inInds.length*5, x, y);
+        if (arrowBox) {
+          this.drawArrow(cont, arrowBox.x + arrowBox.width, arrowBox.y + 40 + arrowBox.inInds.length*5, x, y);
+        }
       }
     }
     if (this.dragginNow && !isNaN(this.dragIndex)) {
@@ -334,6 +355,7 @@ class App extends Component{
   }
 
   dragEnd = (event) => {
+    console.log(this.boxes);
     event.stopPropagation();
     this.dragginNow = false;
     this.dragIndex = false;
