@@ -66,8 +66,8 @@ class App extends Component{
       const cont = this.canvasRef.current.getContext('2d');
       let x = dimen.x + dimen.width;
       for (let i = 0; i < dimen.connInds.length; i++) {
-        let y = dimen.y + (i+1)*10;
-        this.drawArrow(cont, x, y, this.boxes[dimen.connInds[i]].x, this.boxes[dimen.connInds[i]].y+(this.boxes[dimen.connInds[i]].inInds.indexOf(index)+1)*10);
+        let y = dimen.y + 40 + (i+1)*5;
+        this.drawArrow(cont, x, y, this.boxes[dimen.connInds[i]].x, this.boxes[dimen.connInds[i]].y+40+(this.boxes[dimen.connInds[i]].inInds.indexOf(index)+1)*5);
       }
     }
   }
@@ -218,11 +218,11 @@ class App extends Component{
        }
       cont.fillStyle = "#ffffff";
       cont.fillRect(dimen.x, dimen.y, dimen.width, dimen.height); 
-      cont.font = "30px Arial";
+      cont.font = "20px Arial";
       cont.fillStyle = "#000000";
-      cont.fillText(dimen.text, dimen.x + 50, dimen.y + 50);
-      cont.fillRect(dimen.x, dimen.y, 10, dimen.height);
-      cont.fillRect(dimen.x+dimen.width-10, dimen.y, 10, dimen.height); 
+      cont.fillText(dimen.text, dimen.x + 70, dimen.y + 30);
+      cont.fillRect(dimen.x, dimen.y+40, 50, 50);
+      cont.fillRect(dimen.x+dimen.width-50, dimen.y+40, 50, 50); 
     }
   }
 
@@ -273,15 +273,8 @@ class App extends Component{
     return false
   }
 
-  isPointInLeftArrowZone = (x, y, x1, y1, x2, y2) => {
-    if (x > x1 && x < x1+10 && y > y1 && y < y2) {
-      return true;
-    }
-    return false;
-  }
-
   isPointInRightArrowZone = (x, y, x1, y1, x2, y2) => {
-    if (x > x2-10 && x < x2 && y > y1 && y < y2) {
+    if (x > x2-50 && x < x2 && y > y1+40 && y < y1+40+50) {
       return true;
     }
     return false;
@@ -317,7 +310,7 @@ class App extends Component{
         let arrowBox = this.boxes[this.arrowIndex];
         this.clearRect();
         this.drawAllBoxes();
-        this.drawArrow(cont, arrowBox.x + arrowBox.width, arrowBox.y + arrowBox.inInds.length*10, x, y);
+        this.drawArrow(cont, arrowBox.x + arrowBox.width, arrowBox.y + 40 + arrowBox.inInds.length*5, x, y);
       }
     }
     if (this.dragginNow && !isNaN(this.dragIndex)) {
